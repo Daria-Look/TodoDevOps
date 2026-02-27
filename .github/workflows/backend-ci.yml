@@ -2,9 +2,9 @@ name: Backend CI
 
 on:
   push:
-    branches: [ "main" ] # Срабатывает, когда отправляется код в ветку main
+    branches: [ "master" ] # Срабатывает, когда отправляется код в ветку master
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   # Первая задача: Сборка и проверка зависимостей
