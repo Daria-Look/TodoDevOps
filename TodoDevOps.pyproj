@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>995b79de-a55f-453a-b9d0-8a28509afb32</ProjectGuid>
+    <ProjectGuid>{a67d298a-0efc-43ec-07c6-b97f1a603097}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>TodoDevOps.py</StartupFile>
     <SearchPath>
