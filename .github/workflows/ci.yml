@@ -52,6 +52,7 @@ jobs:
 
   # --- FRONTEND: TEST ---
   frontend-test:
+    needs: backend-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
