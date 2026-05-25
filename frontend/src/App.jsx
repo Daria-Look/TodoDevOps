@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
+  const API_URL = `http://${window.location.hostname}:8000`;
 
   const fetchTodos = async () => {
-    const res = await fetch('http://111.88.240.125:5173/items'); // IP будет меняться, по-хорошему это надо автоматизировать, вопрос - как
+    const res = await fetch(`${API_URL}/items`); 
     const data = await res.json();
     setTodos(data);
   };
@@ -14,7 +15,7 @@ function App() {
 
   const addTodo = async () => {
     if (!newTodo) return;
-    await fetch('http://111.88.240.125:5173/items', {
+    await fetch(`${API_URL}/items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTodo })
@@ -25,7 +26,7 @@ function App() {
 
   // --- UPDATE ---
   const toggleTodo = async (id) => {
-    await fetch(`http://111.88.240.125:5173/items/${id}`, {
+    await fetch(`${API_URL}/items/${id}`, {
       method: 'PUT'
     });
     fetchTodos();
@@ -33,7 +34,7 @@ function App() {
 
   // --- DELETE ---
   const deleteTodo = async (id) => {
-    await fetch(`http://111.88.240.125:5173/items/${id}`, {
+    await fetch(`${API_URL}/items/${id}`, {
       method: 'DELETE'
     });
     fetchTodos();
