@@ -5,7 +5,7 @@ function App() {
   const [newTodo, setNewTodo] = useState("");
 
   const fetchTodos = async () => {
-    const res = await fetch('http://localhost:8000/items');
+    const res = await fetch('http://111.88.240.125:5173/items'); // IP будет меняться, по-хорошему это надо автоматизировать, вопрос - как
     const data = await res.json();
     setTodos(data);
   };
@@ -14,7 +14,7 @@ function App() {
 
   const addTodo = async () => {
     if (!newTodo) return;
-    await fetch('http://localhost:8000/items', {
+    await fetch('http://111.88.240.125:5173/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTodo })
@@ -25,7 +25,7 @@ function App() {
 
   // --- UPDATE ---
   const toggleTodo = async (id) => {
-    await fetch(`http://localhost:8000/items/${id}`, {
+    await fetch(`http://111.88.240.125:5173/items/${id}`, {
       method: 'PUT'
     });
     fetchTodos();
@@ -33,7 +33,7 @@ function App() {
 
   // --- DELETE ---
   const deleteTodo = async (id) => {
-    await fetch(`http://localhost:8000/items/${id}`, {
+    await fetch(`http://111.88.240.125:5173/items/${id}`, {
       method: 'DELETE'
     });
     fetchTodos();
