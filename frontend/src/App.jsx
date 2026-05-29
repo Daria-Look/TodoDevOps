@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
-  const API_URL = `http://${window.location.hostname}:8000`;
+  const API_URL = "/api";
 
   const fetchTodos = async () => {
     const res = await fetch(`${API_URL}/items`); 
