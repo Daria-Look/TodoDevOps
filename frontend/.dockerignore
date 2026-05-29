@@ -6,16 +6,20 @@ node_modules
 .gitattributes
 
 .vs
+
 logs
 *.log
 tmp
 temp
+cache
+.pytest_cache
+__pycache__
+
+.venv
 
 build
 out
 dist
-
-.venv
 
 .dockerignore
 Dockerfile
