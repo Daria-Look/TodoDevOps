@@ -7,6 +7,9 @@ from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from typing import List
 
+# ПОДКЛЮЧАЕМ БИБЛИОТЕКУ ДЛЯ МЕТРИК
+from prometheus_fastapi_instrumentator import Instrumentator
+
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
 
 engine = create_engine(DATABASE_URL)
@@ -19,7 +22,6 @@ class Todo(Base):
     title = Column(String, index=True)
     completed = Column(Boolean, default=False)
 
-# --- Создание таблиц при запуске --- 
 Base.metadata.create_all(bind=engine)
 
 class TodoCreate(BaseModel):
@@ -35,12 +37,15 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    # --- Адрес фронтенда --- 
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- АВТОМАТИЧЕСКИЙ СБОР МЕТРИК ДЛЯ PROMETHEUS ---
+# Этот блок создаст эндпоинт /metrics и начнет считать все входящие запросы
+Instrumentator().instrument(app).expose(app)
 
 def get_db():
     db = SessionLocal()
