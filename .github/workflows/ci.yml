@@ -170,3 +170,30 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # --- 7. УВЕДОМЛЕНИЕ В ТЕЛЕГРАМ ПРИ УСПЕХЕ ---
+      - name: Send Telegram Success Notification
+        if: success() # Сработает, только если все шаги и тесты прошли успешно
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🚀 *Пайплайн Todo DevOps CI завершен успешно!*
+            ✅ Тесты бэкенда и фронтенда: *PASSED*
+            🔒 Анализ качества SonarQube: *PASSED* (Допустимое покрытие)
+            📦 Сборка завершена, Argo CD автоматически обновляет приложение в Yandex Cloud!
+
+      # --- 8. УВЕДОМЛЕНИЕ В ТЕЛЕГРАМ ПРИ ПАДЕНИИ ---
+      - name: Send Telegram Failure Notification
+        if: failure() # Сработает, если тесты упали или покрытие кода ниже 80%
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            ⚠️ *Внимание! Пайплайн Todo DevOps CI СЛОМАЛСЯ!*
+            ❌ Одна из задач (тесты, сборка или Quality Gate по покрытию) завершилась ошибкой.
+            Пожалуйста, проверьте логи сборки на GitHub Actions!
