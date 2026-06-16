@@ -35,8 +35,16 @@ jobs:
         run: |
           cd backend
           pip install -r requirements.txt
-          pip install pytest-cov # Устанавливаем плагин для сбора покрытия
-          pytest --cov=. --cov-report=xml:coverage.xml # Генерируем coverage.xml
+          # Устанавливаем плагин для сбора покрытия
+          pip install pytest-cov
+          # Генерируем coverage.xml
+          pytest --cov=. --cov-report=xml:coverage.xml
+      # Сохраняем XML-отчет бэкенда в облако GitHub
+      - name: Upload Python Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage
+          path: backend/coverage.xml
 
   # --- BACKEND: BUILD ---
   backend-build:
@@ -65,7 +73,12 @@ jobs:
           npm install
           # Устанавливаем провайдер покрытия и запускаем сбор отчёта в формате lcov
           npx vitest run --coverage.enabled --coverage.reporter=lcov || echo "No tests found yet"
-
+      # Сохраняем отчет фронтенда в облако GitHub
+      - name: Upload JS Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: js-coverage
+          path: frontend/coverage/lcov.info
   
   # --- FRONTEND: BUILD ---
   frontend-build:
@@ -122,15 +135,29 @@ jobs:
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/frontend:v1
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/frontend:${{ github.sha }}
 
-# --- 6. СКАНИРОВАНИЕ НА УЯЗВИМОСТИ (SONARQUBE) ---
- sonarqube-analysis:
+  # --- 6. СКАНИРОВАНИЕ НА УЯЗВИМОСТИ (SONARQUBE) ---
+  sonarqube-analysis:
     # Сонар должен дождаться выполнения тестов, чтобы файлы отчётов были созданы
     needs: [backend-test, frontend-test] 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
+
+      # Скачиваем отчет бэкенда
+      - name: Download Python Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: python-coverage
+          path: backend/
+
+      # Скачиваем отчет фронтенда
+      - name: Download JS Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: js-coverage
+          path: frontend/coverage/
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
