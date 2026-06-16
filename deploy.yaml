@@ -1,0 +1,92 @@
+# 1. БЭКЕНД
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1 # Начинаем с 1 пода, HPA сам увеличит их количество при нагрузке
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: cr.yandex/crpjrj0rvri6fotfdpmg/backend:v1
+        imagePullPolicy: Always # K8s всегда будет проверять и скачивать новый образ, даже если тег v1 не изменился
+        ports:
+        - containerPort: 8000        
+        env:
+        # ИСПРАВЛЕНО: Безопасно вытаскиваем пароль из созданного вручную секрета
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: postgres-password
+        # ИСПРАВЛЕНО: Подставляем пароль динамически через переменную $(DB_PASSWORD)
+        - name: DATABASE_URL
+          value: "postgresql://user:$(DB_PASSWORD)@db-service:5432/db"
+        # Ограничиваем ресурсы
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m" # 15% нагрузки будет считаться от этих 100m
+            memory: "128Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend 
+spec:
+  type: ClusterIP # Изменили тип на ClusterIP, чтобы освободить дефицитный внешний IP Яндекса для SonarQube
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+
+# 2. ФРОНТЕНД
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: cr.yandex/crpjrj0rvri6fotfdpmg/frontend:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5173  
+        env:
+        - name: BACKEND_URL # Передаем адрес бэкенда как переменную окружения
+          value: "http://backend:8000" 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: LoadBalancer # Оставляем LoadBalancer — это наше окно для входа на сайт из интернета
+  selector:
+    app: frontend
+  ports:
+    - port: 5173
+      targetPort: 5173
+

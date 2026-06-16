@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-service-monitor
+  namespace: default # Где лежит бэкенд
+  labels:
+    release: kube-prometheus-stack # Prometheus увидит манифест
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+  - targetPort: 8000 # Явно указываем порт контейнера бэкенда
+    path: /metrics   # Эндпоинт, куда Python-приложение отдает метрики
+    interval: 15s 
+
