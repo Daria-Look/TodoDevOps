@@ -122,16 +122,20 @@ jobs:
 
 # --- 6. СКАНИРОВАНИЕ НА УЯЗВИМОСТИ (SONARQUBE) ---
   sonarqube-analysis:
-    needs: [backend-test, frontend-test] # Запуск только после успешных тестов кода
+    needs: [backend-test, frontend-test]
     runs-on: ubuntu-latest
     steps:
-      # Сонар требует fetch-depth: 0, чтобы видеть историю коммитов и авторов кода
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  
 
+      # Исправленный шаг сканирования с аргументами
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=todo-app
+            -Dsonar.sources=.
