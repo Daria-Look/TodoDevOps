@@ -139,3 +139,9 @@ jobs:
           args: >
             -Dsonar.projectKey=todo-app
             -Dsonar.sources=.
+      # CI упадет, если Сонар найдет ошибки или покрытие < 80%
+      - name: SonarQube Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
