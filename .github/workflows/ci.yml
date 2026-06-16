@@ -35,7 +35,8 @@ jobs:
         run: |
           cd backend
           pip install -r requirements.txt
-          pytest
+          pip install pytest-cov # Устанавливаем плагин для сбора покрытия
+          pytest --cov=. --cov-report=xml:coverage.xml # Генерируем coverage.xml
 
   # --- BACKEND: BUILD ---
   backend-build:
@@ -62,7 +63,8 @@ jobs:
       - run: |
           cd frontend
           npm install
-          npx vitest run || echo "No tests found yet"
+          # Устанавливаем провайдер покрытия и запускаем сбор отчёта в формате lcov
+          npx vitest run --coverage.enabled --coverage.reporter=lcov || echo "No tests found yet"
 
   
   # --- FRONTEND: BUILD ---
@@ -121,15 +123,15 @@ jobs:
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/frontend:${{ github.sha }}
 
 # --- 6. СКАНИРОВАНИЕ НА УЯЗВИМОСТИ (SONARQUBE) ---
-  sonarqube-analysis:
-    needs: [backend-test, frontend-test]
+ sonarqube-analysis:
+    # Сонар должен дождаться выполнения тестов, чтобы файлы отчётов были созданы
+    needs: [backend-test, frontend-test] 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  
 
-      # Исправленный шаг сканирования с аргументами
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -139,7 +141,11 @@ jobs:
           args: >
             -Dsonar.projectKey=todo-app
             -Dsonar.sources=.
-      # CI упадет, если Сонар найдет ошибки или покрытие < 80%
+            -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/site-packages/**
+            -Dsonar.python.coverage.reportPaths=backend/coverage.xml
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+
+      # Добавляем шаг проверки Quality Gate (CI упадет, если покрытие будет ниже 80%)
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
