@@ -44,6 +44,19 @@ jobs:
           name: python-coverage
           path: backend/coverage.xml
 
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🖥️ *Job:* `backend-test`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
+            🔗 [Посмотреть логи](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+
   # --- 2. BACKEND: BUILD ---
   backend-build:
     needs: backend-test
@@ -55,6 +68,18 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
       - run: pip install -r backend/requirements.txt
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🏗️ *Job:* `backend-build`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
+            🔗 [Посмотреть логи](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
 
   # --- 3. FRONTEND: TEST ---
   frontend-test:
@@ -78,6 +103,19 @@ jobs:
           path: frontend/coverage/lcov.info
           if-no-files-found: warn
 
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🧪 *Job:* `frontend-test`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
+            🔗 [Посмотреть логи](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+
   # --- 4. FRONTEND: BUILD ---
   frontend-build:
     needs: frontend-test
@@ -93,6 +131,19 @@ jobs:
           cd frontend
           npm install
           npm run build
+
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🎨 *Job:* `frontend-build`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
+            🔗 [Посмотреть логи](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
 
   # --- 5. СОХРАНЕНИЕ ОБРАЗОВ В ОБЛАКЕ ---
   push-to-yandex-registry:
@@ -144,6 +195,20 @@ jobs:
           git commit -m "Auto-update image tags to ${{ github.sha }} [skip ci]"
           git push origin master
 
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            📦 *Job:* `push-to-yandex-registry`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILED' }}
+            ⚙️ *Argo CD:* Манифесты обновлены.
+            🔗 [Посмотреть логи](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+
   # --- 6. СКАНИРОВАНИЕ НА УЯЗВИМОСТИ (SONARQUBE) ---
   sonarqube-analysis:
     needs: [backend-test, frontend-test] 
@@ -185,29 +250,15 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # --- 7. УВЕДОМЛЕНИЕ В ТЕЛЕГРАМ ПРИ УСПЕХЕ ---
-      - name: Send Telegram Success Notification
-        if: success() # Сработает, только если все шаги и тесты прошли успешно
+      - name: Telegram Notification
+        if: always()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            🚀 *Пайплайн Todo DevOps CI завершен успешно!*
-            ✅ Тесты бэкенда и фронтенда: *PASSED*
-            🔒 Анализ качества SonarQube: *PASSED* (Допустимое покрытие)
-            📦 Сборка завершена, Argo CD автоматически обновляет приложение в Yandex Cloud!
+            🔒 *Job:* `sonarqube-analysis`
+            📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS (Quality Gate Pass)' || '❌ FAILED (Quality Gate Fail)' }}
+            🏁 [Посмотреть итоговый пайплайн](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-      # --- 8. УВЕДОМЛЕНИЕ В ТЕЛЕГРАМ ПРИ ПАДЕНИИ ---
-      - name: Send Telegram Failure Notification
-        if: failure() # Сработает, если тесты упали или покрытие кода ниже 80%
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ⚠️ *Внимание! Пайплайн Todo DevOps CI СЛОМАЛСЯ!*
-            ❌ Одна из задач (тесты, сборка или Quality Gate по покрытию) завершилась ошибкой.
-            Пожалуйста, проверьте логи сборки на GitHub Actions!
