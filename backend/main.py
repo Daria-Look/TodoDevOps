@@ -10,7 +10,7 @@ from typing import List
 # ПОДКЛЮЧАЕМ БИБЛИОТЕКУ ДЛЯ МЕТРИК
 from prometheus_fastapi_instrumentator import Instrumentator
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@postgres:5432/db")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
