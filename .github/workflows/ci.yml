@@ -171,6 +171,7 @@ jobs:
         with:
           context: ./backend
           push: true
+          provenance: false
           tags: |
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/backend:v1
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/backend:${{ github.sha }}
@@ -180,6 +181,7 @@ jobs:
         with:
           context: ./frontend
           push: true
+          provenance: false
           tags: |
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/frontend:v1
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/frontend:${{ github.sha }}
