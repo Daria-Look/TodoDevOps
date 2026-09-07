@@ -96,7 +96,7 @@ jobs:
           # npm install -D @vitest/coverage-v8
           # npx vitest run --coverage --coverage.reporter=lcov || echo "No tests found yet"
           npm install --legacy-peer-deps
-          npm install -D @vitest/coverage-v8 --legacy-peer-deps
+          npm install -D vitest @vitest/coverage-v8@latest --legacy-peer-deps # Принудительно ставим свежий плагин
           npx vitest run --coverage --coverage.reporter=lcov || echo "No tests found yet"
 
       - name: Upload JS Coverage Artifact
