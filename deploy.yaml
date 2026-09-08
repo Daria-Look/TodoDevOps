@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: cr.yandex/crpjrj0rvri6fotfdpmg/backend:3a70ebe6bb05cb7eea56b3d8310b283b700a5731
+        image: cr.yandex/crpjrj0rvri6fotfdpmg/backend:80230bf3bef061c176206b9e196133dd5063670d
         imagePullPolicy: Always # K8s всегда будет проверять и скачивать новый образ, даже если тег v1 не изменился
         ports:
         - containerPort: 8000        
@@ -73,7 +73,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: cr.yandex/crpjrj0rvri6fotfdpmg/frontend:3a70ebe6bb05cb7eea56b3d8310b283b700a5731
+        image: cr.yandex/crpjrj0rvri6fotfdpmg/frontend:80230bf3bef061c176206b9e196133dd5063670d
         imagePullPolicy: Always
         ports:
         - containerPort: 5173  
