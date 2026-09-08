@@ -268,3 +268,4 @@ jobs:
             📊 *Статус:* ${{ job.status == 'success' && '✅ SUCCESS (Quality Gate Pass)' || '❌ FAILED (Quality Gate Fail)' }}
             🏁 [Посмотреть итоговый пайплайн](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
+# проверка 1, 2, 3...
